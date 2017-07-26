@@ -9,14 +9,15 @@
 
 <body>
     <canvas id="myCanvas" width="800" height="600" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
-    <script>
-        var canvas = document.getElementById("myCanvas");
-        var context = canvas.getContext('2d');
-        var render = new BLFRender(context);
-        var rect = BLFRectSprite();
-        rect.render(render);
-    </script>
+
 </body>
 
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext('2d');
+    var render = new BLFRender(context);
+    var rect = BLFRectSprite();
+    rect.render(render);
+</script>
 
 </html>
