@@ -32,33 +32,45 @@ function BLFRender(context) {
 }
 
 BLFRender.prototype.drawGrid = function(backcolor, color, stepx, stepy) {
-        context = this.context;
+    context = this.context;
 
-        context.save()
+    context.save()
 
-        context.strokeStyle = color;
-        context.fillStyle = backcolor;
-        context.lineWidth = 0.5;
-        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-        context.globalAlpha = 0.5;
+    context.strokeStyle = color;
+    context.fillStyle = backcolor;
+    context.lineWidth = 0.5;
+    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    context.globalAlpha = 0.5;
 
-        context.beginPath();
-        for (var i = stepx + 0.5; i < context.canvas.width; i += stepx) {
-            context.moveTo(i, 0);
-            context.lineTo(i, context.canvas.height);
-        }
-        context.stroke();
-
-        context.beginPath();
-        for (var i = stepy + 0.5; i < context.canvas.height; i += stepy) {
-            context.moveTo(0, i);
-            context.lineTo(context.canvas.width, i);
-        }
-        context.stroke();
-
-        context.restore();
+    context.beginPath();
+    for (var i = stepx + 0.5; i < context.canvas.width; i += stepx) {
+        context.moveTo(i, 0);
+        context.lineTo(i, context.canvas.height);
     }
-    /*************************************Render End******************************************************/
+    context.stroke();
+
+    context.beginPath();
+    for (var i = stepy + 0.5; i < context.canvas.height; i += stepy) {
+        context.moveTo(0, i);
+        context.lineTo(context.canvas.width, i);
+    }
+    context.stroke();
+
+    context.restore();
+}
+
+BLFRender.prototype.drawText = function(x, y, color, str) {
+    context = this.context;
+
+    context.save();
+
+    context.strokeStyle = color;
+    context.strokeText(str, x, y);
+
+    context.restore();
+}
+
+/*************************************Render End******************************************************/
 
 /*************************************Sprite System Begin***************************************************/
 function BLFBaseSprite() {
@@ -86,6 +98,13 @@ function BLFRectSprite() {
     this.typeName = "RECT";
 }
 
+
+BLFBaseSprite.prototype.render = function(render) {
+    render.drawGrid('black', 'white', 10, 10);
+    render.drawText(10, 10, 'blue', "随风而行之青衫磊落险峰行测试RenderSurface");
+}
+
 BLFUtil.inherits(BLFRectSprite, BLFBaseSprite);
+
 
 /*************************************Sprite System End*****************************************************/
