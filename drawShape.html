@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>随风而行之青衫磊落险峰行JSDemo</title>
+    <script src="BLFES6Lib.js"></script>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="800" height="600" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
+    <script>
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext('2d');
+        let render = new BLFRender(context);
+
+        //render.clear(new Rect(0, 0, 800, 600));
+        render.clear();
+        render.drawGrid('white', 'black', 20, 20);
+
+        render.drawRect(new Rect(10, 10, 80, 40));
+        render.drawRect(new Rect(110, 10, 80, 40), 'blue', false);
+
+        render.drawCircle(new Circle(300, 200, 50));
+        render.drawCircle(new Circle(300, 350, 50), 'blue', false);
+
+
+
+        /*
+        下面两个函数共同点:
+          1. 圆心都为【100，200】，半径都为50px
+          2. 起始角都为30度，结束角都为180度
+          3. isClosed都设置为false,不封闭arc路径
+        下面两个函数不同点:
+          1. 上面函数isCCW(是否逆时针) = false,style = red
+          2. 下面函数isCCW(是否逆时针) = true, style = blue
+           
+        */
+        render.drawArc(new Arc(100, 200, 50, 30, 180, false), 'red', false);
+        render.drawArc(new Arc(100, 200, 50, 30, 180, false, true), 'blue', false);
+    </script>
+</body>
+
+</html>

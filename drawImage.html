@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>随风而行之青衫磊落险峰行JSDemo</title>
+    <script src="BLFES6Lib.js"></script>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="800" height="600" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
+    <script>
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext('2d');
+        let render = new BLFRender(context);
+        let image = new Image();
+
+        image.src = "./data/doom3.png";
+        image.onload = function(e) {
+            render.drawImage(image);
+            render.drawImage(image, null, new Rect(10, 400, 100, 100));
+            render.drawImage(image, new Rect(0, 0, image.width * 0.5, image.height * 0.5), new Rect(500, 100, 200, 100));
+        }
+    </script>
+</body>
+
+</html>

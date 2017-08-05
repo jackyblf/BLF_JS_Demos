@@ -4,23 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <title>随风而行之青衫磊落险峰行JSDemo-RenderSurface</title>
-    <script src="BLFLib.js"></script>
+    <script src="BLFES6Lib.js"></script>
 </head>
 
 <body>
 
-    <!--
-    <canvas id="myCanvas" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
-    -->
-
-    <canvas id="myCanvas" width="800" height="600" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
+    <canvas id="myCanvas" width=300 height=300 style="border: 1px solid blue;">你的浏览器还不支持哦</canvas>
 
     <script>
-        var canvas = document.getElementById("myCanvas");
-        var context = canvas.getContext('2d');
-        var render = new BLFRender(context);
-        var rect = BLFRectSprite();
+        "use strict";
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext('2d');
+        let render = new BLFRender(context);
+        let rect = new BLFRectSprite();
         rect.render(render);
+
+        alert("1. elm size = [" + canvas.width + "," + canvas.height + "]");
+        alert("2. css size = [" + canvas.style.width + "," + canvas.style.height + "]");
     </script>
 </body>
 
