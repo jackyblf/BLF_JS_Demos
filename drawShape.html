@@ -14,21 +14,19 @@
         let context = canvas.getContext('2d');
         let render = new BLFRender(context);
 
-        //render.clear(new Rect(0, 0, 800, 600));
         render.clear();
         render.drawGrid('white', 'black', 20, 20);
 
         render.drawRect(new Rect(10, 10, 80, 40));
         render.drawRect(new Rect(110, 10, 80, 40), 'blue', false);
 
-        render.drawCircle(new Circle(300, 200, 50));
-        render.drawCircle(new Circle(300, 350, 50), 'blue', false);
-
+        render.drawCircle(new Circle(310, 60, 50));
+        render.drawCircle(new Circle(410, 60, 50), 'blue', false);
 
 
         /*
         下面两个函数共同点:
-          1. 圆心都为【100，200】，半径都为50px
+          1. 圆心都为【600，60】，半径都为50px
           2. 起始角都为30度，结束角都为180度
           3. isClosed都设置为false,不封闭arc路径
         下面两个函数不同点:
@@ -36,8 +34,30 @@
           2. 下面函数isCCW(是否逆时针) = true, style = blue
            
         */
-        render.drawArc(new Arc(100, 200, 50, 30, 180, false), 'red', false);
-        render.drawArc(new Arc(100, 200, 50, 30, 180, false, true), 'blue', false);
+        render.drawArc(new Arc(600, 60, 50, 30, 180, false), 'red', false);
+        render.drawArc(new Arc(600, 60, 50, 30, 180, false, true), 'blue', false);
+
+        let image = new Image();
+        let image1 = new Image();
+        image.src = "./data/doom3.png";
+        image1.src = "./data/ardunio_nano.jpg";
+
+
+        image.onload = function(e) {
+            let pattern = render.createPattern(image);
+
+            if (pattern) {
+                render.drawCircle(new Circle(200, 200, 100), pattern);
+                render.drawArc(new Arc(500, 200, 100, 30, 180), pattern);
+            }
+        }
+
+        image1.onload = function(e) {
+            let pattern = render.createPattern(image1);
+            if (pattern) {
+                render.drawRect(new Rect(0, 400, 800, 200), pattern);
+            }
+        }
     </script>
 </body>
 

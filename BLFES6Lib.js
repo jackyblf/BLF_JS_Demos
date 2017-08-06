@@ -232,6 +232,17 @@ class BLFRender {
         //进行bitblt操作(位块传输)，根据src/dest的rect的大小，自动进行缩放或拉伸
         context.drawImage(image, srcRect.x, srcRect.y, srcRect.width, srcRect.height, destRect.x, destRect.y, destRect.width, destRect.height);
     }
+
+    //type='repeat'/'repeat-x'/'repeat-y'/'no-repeat'
+    //目前来说，很多浏览器只支持repeat方式
+    createPattern(image, type = "repeat") {
+        if (image == null)
+            return null;
+
+        let ret = this.context.createPattern(image, type);
+
+        return ret;
+    }
 }
 
 class BLFSprite {
