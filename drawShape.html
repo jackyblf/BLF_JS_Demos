@@ -15,13 +15,21 @@
         let render = new BLFRender(context);
 
         render.clear();
+
         render.drawGrid('white', 'black', 20, 20);
+
+        render.setShadowState();
+        render.setLineState();
 
         render.drawRect(new Rect(10, 10, 80, 40));
         render.drawRect(new Rect(110, 10, 80, 40), 'blue', false);
 
         render.drawCircle(new Circle(310, 60, 50));
         render.drawCircle(new Circle(410, 60, 50), 'blue', false);
+
+        render.setTextState();
+        render.drawText(100, 100);
+
 
 
         /*
@@ -36,6 +44,9 @@
         */
         render.drawArc(new Arc(600, 60, 50, 30, 180, false), 'red', false);
         render.drawArc(new Arc(600, 60, 50, 30, 180, false, true), 'blue', false);
+
+        let pts = [new Point(700, 50), new Point(790, 50), new Point(790, 200)];
+        render.drawPoints(pts, 'blue', false, false);
 
         let image = new Image();
         let image1 = new Image();

@@ -1,5 +1,6 @@
 "use strict";
 
+//辅助类，定义静态辅助方法
 class BLFUtil {
     static toRadian(degree) {
         return degree * Math.PI / 180.0;
@@ -10,6 +11,7 @@ class BLFUtil {
     }
 }
 
+//基本几何shape数据结构
 class Point {
     constructor(x = 0, y = 0) {
         this.x = x;
@@ -17,14 +19,12 @@ class Point {
     }
 }
 
-
 class Size {
     constructor(width = 100, height = 100) {
         this.width = width;
         this.height = height;
     }
 }
-
 
 //圆心+半径确定一个圆
 class Circle {
@@ -34,6 +34,18 @@ class Circle {
         this.radius = radius;
     }
 }
+
+
+
+//三角形
+class Triangle {
+    constructor(p0 = new Point(0, 0), p1 = new Point(100, 0), p2 = new Point(100, 100)) {
+        this.p0 = p0;
+        this.p1 = p1;
+        this.p2 = p2;
+    }
+}
+
 
 //原点+尺寸确定一个矩形
 class Rect {
@@ -58,6 +70,8 @@ class Arc {
     }
 }
 
+
+//渲染器
 class BLFRender {
     constructor(ctx) {
         this.context = ctx;
@@ -71,8 +85,111 @@ class BLFRender {
         return (this.context.canvas.height);
     }
 
+    pushStates() {
+        this.context.save();
+    }
+
+    popStates() {
+        this.context.restore();
+    }
+
+
+    /*
+    ctx.lineWidth = value;  canvas2d default 1.0
+
+    ctx.lineCap = "butt";   canvas2d default
+    ctx.lineCap = "round";
+    ctx.lineCap = "square";
+
+    ctx.lineJoin = "bevel";
+    ctx.lineJoin = "round";
+    ctx.lineJoin = "miter";  canvas2d defaule
+
+    ctx.miterLimit = value;  canvas2d default 10.0
+    */
+    setLineState(lineWidth = 2.0, lineCap = 'butt', lineJoin = 'round', miterLimit = 10.0) {
+        let ctx = this.context;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = lineCap;
+        ctx.lineJoin = lineJoin;
+        ctx.miterLimit = miterLimit;
+    }
+
+    /*
+    ctx.shadowColor = color;      canvas2d default rgba(0,0,0,0)
+    ctx.shadowOffsetX = offset;   canvas2d default 0.0
+    ctx.shadowOffsetY = offset;   canvas2d default 0.0
+    ctx.shadowBlur = level;       canvas2d default 0.0
+    */
+    setShadowState(shadowColor = 'rgba(0,0,0,0.5)', shadowOffsetX = 2, shadowOffsetY = 2, shadowBlur = 2) {
+        let ctx = this.context;
+        ctx.shadowColor = shadowColor;
+        ctx.shadowOffsetX = shadowOffsetX;
+        ctx.shadowOffsetY = shadowOffsetY;
+        ctx.shadowBlur = shadowBlur;
+    }
+
+    /*
+    ctx.textAlign = "left" || "right" ||
+                    "center" || "start" ||
+                     "end";             
+                     canvas2d default start
+
+    ctx.textBaseline = "top" || "hanging" ||
+                       "middle" || "alphabetic" ||
+                       "ideographic" || "bottom";
+                       canvas2d default alphabetic
+                       
+    ctx.font = value;  canvas2d default 10px sans-serif 
+    */
+    setTextState(textAlign = 'center', textBaseLine = 'middle', font = '14px sans-serif') {
+        let ctx = this.context;
+        ctx.textAlign = textAlign;
+        ctx.textBaseLine = textBaseLine;
+        ctx.font = font;
+    }
+
     clear(rect = new Rect(0, 0, this.getCanvasWidth(), this.getCanvasHeight())) {
         this.context.clearRect(rect.x, rect.y, rect.width, rect.height);
+    }
+
+    //通用函数，可以绘制点线面，是否封闭，是否填充
+    //其他绘制函数，都是该函数的特殊形式
+    drawPoints(points = [], style = 'red', isClosed = true, isFill = true) {
+
+        //必须要大与等于2个点
+        if (points.length < 2)
+            return;
+
+        let ctx = this.context;
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        //移动到第一个点位置
+        ctx.moveTo(points[0].x, points[0].y);
+
+        //从1-(n-1)循环绘制线段
+        for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i].x, points[i].y);
+        }
+
+        //如果需要，封闭路径
+        if (isClosed == true) {
+            ctx.closePath();
+        }
+
+        //填充还是描边绘制
+        if (isFill == true) {
+            ctx.fillStyle = style;
+            ctx.fill();
+        } else {
+            ctx.strokeStyle = style;
+            ctx.stroke();
+        }
+
+        ctx.restore();
     }
 
     //context.strokeRect/fillRect不需要beginPath进行渲染状态清除
@@ -100,7 +217,7 @@ class BLFRender {
 
         let ctx = this.context;
 
-        ctx.save();
+        ctx.save()
 
         ctx.beginPath(); //清除当前路径列表中的所有子路径
         ctx.arc(circle.x, circle.y, circle.radius, 0.0, Math.PI * 2.0, true);
@@ -197,12 +314,12 @@ class BLFRender {
     fill使用fillStyle提供的央视进行绘制
     为什么称为style而不是color? 因为style不单单支持color，还支持渐变色、贴图等样式
     */
-    drawText(x, y, color, str) {
+    drawText(x = 0, y = 0, str = '随风而行之青衫磊落险峰行', style = 'black') {
         let context = this.context;
 
         context.save();
 
-        context.fillStyle = color;
+        context.fillStyle = style;
         context.fillText(str, x, y);
 
         //context.strokeStyle = color;
