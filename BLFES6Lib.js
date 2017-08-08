@@ -35,8 +35,6 @@ class Circle {
     }
 }
 
-
-
 //三角形
 class Triangle {
     constructor(p0 = new Point(0, 0), p1 = new Point(100, 0), p2 = new Point(100, 100)) {
@@ -155,7 +153,7 @@ class BLFRender {
 
     //通用函数，可以绘制点线面，是否封闭，是否填充
     //其他绘制函数，都是该函数的特殊形式
-    drawPoints(points = [], style = 'red', isClosed = true, isFill = true) {
+    drawPoints(points = [], style = 'red', isClosed = true, isFill = true, compsiteOp = '') {
 
         //必须要大与等于2个点
         if (points.length < 2)
@@ -164,6 +162,10 @@ class BLFRender {
         let ctx = this.context;
 
         ctx.save();
+
+        if (compsiteOp != null && compsiteOp.length != 0)
+            ctx.globalCompositeOperation = compsiteOp;
+
 
         ctx.beginPath();
 
@@ -194,11 +196,14 @@ class BLFRender {
 
     //context.strokeRect/fillRect不需要beginPath进行渲染状态清除
     //是一个简便方法
-    drawRect(rc, style = "red", isFill = true) {
+    drawRect(rc, style = "red", isFill = true, compsiteOp = '') {
 
         let ctx = this.context;
 
         ctx.save();
+
+        if (compsiteOp != null && compsiteOp.length != 0)
+            ctx.globalCompositeOperation = compsiteOp;
 
         ctx.beginPath();
 
@@ -213,14 +218,19 @@ class BLFRender {
         ctx.restore();
     }
 
-    drawCircle(circle, style = "red", isFill = true) {
+    drawCircle(circle, style = "red", isFill = true, compsiteOp = '') {
 
         let ctx = this.context;
 
-        ctx.save()
+        ctx.save();
+
+        if (compsiteOp != null && compsiteOp.length != 0) {
+            ctx.globalCompositeOperation = compsiteOp;
+        }
 
         ctx.beginPath(); //清除当前路径列表中的所有子路径
         ctx.arc(circle.x, circle.y, circle.radius, 0.0, Math.PI * 2.0, true);
+
         //设置样式
         if (isFill) {
             ctx.fillStyle = style;
@@ -233,15 +243,20 @@ class BLFRender {
         ctx.restore();
     }
 
-    drawArc(arc, style = "red", isFill = true) {
+    drawArc(arc, style = "red", isFill = true, compsiteOp = '') {
 
         let ctx = this.context;
 
         ctx.save();
 
+        if (compsiteOp != null && compsiteOp.length != 0)
+            ctx.globalCompositeOperation = compsiteOp;
+
+
         ctx.beginPath(); //清除当前路径列表中的所有子路径
 
         ctx.arc(arc.x, arc.y, arc.radius, BLFUtil.toRadian(arc.startAngle), BLFUtil.toRadian(arc.endAngle), arc.isCCW);
+
         if (arc.isClosed)
             ctx.closePath();
 
@@ -257,7 +272,7 @@ class BLFRender {
         ctx.restore();
     }
 
-    drawGrid(backcolor, color, stepx, stepy) {
+    drawGrid(backcolor, color, stepx, stepy, compsiteOp = '') {
         let context = this.context;
 
         /*渲染状态套路用法:
@@ -285,6 +300,9 @@ class BLFRender {
 
         context.save()
 
+        if (compsiteOp != null && compsiteOp.length != 0)
+            ctx.globalCompositeOperation = compsiteOp;
+
         context.strokeStyle = color;
         context.fillStyle = backcolor;
         context.lineWidth = 0.5;
@@ -295,6 +313,7 @@ class BLFRender {
             context.moveTo(i, 0);
             context.lineTo(i, context.canvas.height);
         }
+
         context.stroke();
 
         context.beginPath();
@@ -314,10 +333,13 @@ class BLFRender {
     fill使用fillStyle提供的央视进行绘制
     为什么称为style而不是color? 因为style不单单支持color，还支持渐变色、贴图等样式
     */
-    drawText(x = 0, y = 0, str = '随风而行之青衫磊落险峰行', style = 'black') {
+    drawText(x = 0, y = 0, str = '随风而行之青衫磊落险峰行', style = 'black', compsiteOp = '') {
         let context = this.context;
 
         context.save();
+
+        if (compsiteOp != null && compsiteOp.length != 0)
+            ctx.globalCompositeOperation = compsiteOp;
 
         context.fillStyle = style;
         context.fillText(str, x, y);
@@ -328,7 +350,7 @@ class BLFRender {
         context.restore();
     }
 
-    drawImage(image, srcRect = null, destRect = null) {
+    drawImage(image, srcRect = null, destRect = null, compsiteOp = '') {
 
         //如果image不存在，直接退出函数
         if (image == null)
@@ -346,8 +368,13 @@ class BLFRender {
 
         let context = this.context;
 
+        context.save();
+
+        if (compsiteOp != null && compsiteOp.length != 0)
+            ctx.globalCompositeOperation = compsiteOp;
         //进行bitblt操作(位块传输)，根据src/dest的rect的大小，自动进行缩放或拉伸
         context.drawImage(image, srcRect.x, srcRect.y, srcRect.width, srcRect.height, destRect.x, destRect.y, destRect.width, destRect.height);
+        context.restore();
     }
 
     //type='repeat'/'repeat-x'/'repeat-y'/'no-repeat'
@@ -359,6 +386,41 @@ class BLFRender {
         let ret = this.context.createPattern(image, type);
 
         return ret;
+    }
+
+    createGradient(params, colors = [{ weight: 0, color: 'red' }, { weight: 1, color: 'blue' }]) {
+        //坐标参数params必须要有内容
+        if (params == null)
+            return null;
+
+        let g = null;
+        let len = params.length;
+
+        //坐标参数个数为0，退出
+        if (len == 0)
+            return null;
+
+        //坐标参数params必须是4个或6个
+        if (len != 4 && len != 6)
+            return null;
+
+        let ctx = this.context;
+
+        if (len == 4) {
+            //线性
+            g = ctx.createLinearGradient(params[0], params[1], params[2], params[3]);
+        } else {
+            //放射性
+            g = ctx.createRadialGradient(params[0], params[1], params[2], params[3], params[4], params[5]);
+        }
+
+        //渐变色不仅仅是2个，还可以多个
+        //但是有一个条件:必须weight之和为1.0
+        for (let i = 0; i < colors.length; i++) {
+            g.addColorStop(colors[i].weight, colors[i].color);
+        }
+
+        return g;
     }
 }
 

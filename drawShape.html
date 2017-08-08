@@ -21,16 +21,11 @@
         render.setShadowState();
         render.setLineState();
 
-        render.drawRect(new Rect(10, 10, 80, 40));
-        render.drawRect(new Rect(110, 10, 80, 40), 'blue', false);
+        render.drawRect(new Rect(2, 2, 80, 40));
+        render.drawRect(new Rect(102, 2, 80, 40), 'blue', false);
 
-        render.drawCircle(new Circle(310, 60, 50));
-        render.drawCircle(new Circle(410, 60, 50), 'blue', false);
-
-        render.setTextState();
-        render.drawText(100, 100);
-
-
+        render.drawCircle(new Circle(250, 50, 50));
+        render.drawCircle(new Circle(360, 50, 50), 'blue', false);
 
         /*
         下面两个函数共同点:
@@ -42,10 +37,15 @@
           2. 下面函数isCCW(是否逆时针) = true, style = blue
            
         */
-        render.drawArc(new Arc(600, 60, 50, 30, 180, false), 'red', false);
-        render.drawArc(new Arc(600, 60, 50, 30, 180, false, true), 'blue', false);
+        render.drawArc(new Arc(470, 50, 50, 30, 180, false), 'red', false);
+        render.drawArc(new Arc(470, 50, 50, 30, 180, false, true), 'blue', false);
 
-        let pts = [new Point(700, 50), new Point(790, 50), new Point(790, 200)];
+        //文字渲染效果，大家可以最后几个参数，查看字体，各种对齐方式
+        render.setTextState();
+        render.drawText(100, 80);
+
+        let pts = [new Point(550, 5), new Point(650, 5), new Point(650, 90)];
+        //大家可以修改最后两个参数，可以看到是否封闭路径，是否填充路径等效果
         render.drawPoints(pts, 'blue', false, false);
 
         let image = new Image();
@@ -53,22 +53,43 @@
         image.src = "./data/doom3.png";
         image1.src = "./data/ardunio_nano.jpg";
 
-
         image.onload = function(e) {
             let pattern = render.createPattern(image);
 
             if (pattern) {
                 render.drawCircle(new Circle(200, 200, 100), pattern);
-                render.drawArc(new Arc(500, 200, 100, 30, 180), pattern);
+                render.drawCircle(new Circle(200, 200, 100), "rgba(255,0,0,0.5)");
+                render.drawArc(new Arc(420, 200, 100, 30, 180), pattern);
             }
         }
 
         image1.onload = function(e) {
             let pattern = render.createPattern(image1);
             if (pattern) {
-                render.drawRect(new Rect(0, 400, 800, 200), pattern);
+                render.drawRect(new Rect(0, 320, 500, 200), pattern);
             }
         }
+
+        //渐变色
+        let colors = [{
+            weight: 0.1,
+            color: "blue"
+        }, {
+            weight: 0.2,
+            color: 'green'
+        }, {
+            weight: 0.7,
+            color: 'red'
+        }];
+
+        let coords = [550, 225, 750, 225]; //线性 4个参数[x0,y0,x1,y1] 组成一条直线
+        let g = render.createGradient(coords, colors);
+        render.drawRect(new Rect(550, 200, 200, 50), g);
+
+        coords = [650, 400, 30, 650, 400, 100]; ///放射性 6 个参数[x0,y0,r0,x1,y1,r1]组成内圆和外圆
+
+        g = render.createGradient(coords /*, colors*/ );
+        render.drawCircle(new Circle(650, 400, 100), g);
     </script>
 </body>
 
