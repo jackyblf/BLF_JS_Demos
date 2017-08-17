@@ -4,17 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <title>随风而行之青衫磊落险峰行JSDemo</title>
-    <script src="BLFLib.js"></script>
+    <script src="BLFES6Lib.js"></script>
 </head>
 
 <body>
     <canvas id="myCanvas" width="800" height="600" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
     <script>
         let canvas = document.getElementById("myCanvas");
-        var context = canvas.getContext('2d');
-        var render = new BLFRender(context);
-        var rect = BLFBaseSprite();
-        rect.render(render);
+        let context = canvas.getContext('2d');
+        let render = new BLFRender(context);
+
+        render.clear();
+
+        //没有裁剪前的绘制
+
+        //网格
+        render.drawGrid('white', 'black', 20, 20);
+
+        //坐标标尺
+        render.drawAxis(0, 0, 800);
+        render.drawAxis(0, 0, 600, 'y');
+
+
+        //渐变色
+        let colors = [{
+            weight: 0.1,
+            color: "blue"
+        }, {
+            weight: 0.2,
+            color: 'green'
+        }, {
+            weight: 0.7,
+            color: 'red'
+        }];
+
+        let coords = [550, 225, 750, 225]; //线性 4个参数[x0,y0,x1,y1] 组成一条直线
+        let g = render.createGradient(coords, colors);
+        let rc = new Rect(550, 200, 200, 50);
+        render.drawRect(rc, g);
+        render.drawCoords(rc);
+
+        coords = [650, 400, 30, 650, 400, 100]; //放射性 6 个参数[x0,y0,r0,x1,y1,r1]组成内圆和外圆
+
+        //render.popStates();
     </script>
 </body>
 

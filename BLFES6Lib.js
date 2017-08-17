@@ -53,6 +53,14 @@ class Rect {
         this.width = width;
         this.height = height;
     }
+
+    getCenterX() {
+        (this.x + this.width) * 0.5;
+    }
+
+    getCenterY() {
+        (this.y + this.height) * 0.5;
+    }
 }
 
 class Arc {
@@ -90,7 +98,6 @@ class BLFRender {
     popStates() {
         this.context.restore();
     }
-
 
     /*
     ctx.lineWidth = value;  canvas2d default 1.0
@@ -151,6 +158,58 @@ class BLFRender {
         this.context.clearRect(rect.x, rect.y, rect.width, rect.height);
     }
 
+
+    drawLine(x0, y0, x1, y1, style = 'red') {
+        let ctx = this.context;
+        ctx.save();
+        ctx.strokeStyle = style;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    //dir = 'x'|'y'
+    drawAxis(x, y, len, dir = 'x', space = 10, style = 'red') {
+        if (dir == 'x')
+            this.drawLine(x, y, x + len, y, style);
+        else
+            this.drawLine(x, y, x, y + len, style);
+
+        let delta;
+        let numTicks = len / space;
+        let ctx = this.context;
+        ctx.save();
+        ctx.strokeStyle = style;
+        for (let i = 1; i < numTicks; ++i) {
+
+            ctx.beginPath();
+
+            if (i % 5 === 0)
+                delta = 10;
+            else
+                delta = 10 / 2;
+
+            if (dir == 'x') {
+                ctx.moveTo(x + i * space, y - delta);
+                ctx.lineTo(x + i * space, y + delta);
+                ctx.stroke();
+            } else {
+                context.moveTo(x - delta, y + i * space);
+                context.lineTo(x + delta, y + i * space);
+                context.stroke();
+            }
+        }
+        ctx.restore();
+    }
+
+
+    drawCoords(rect, space = 10, style = 'red') {
+        this.drawAxis(rect.x, rect.y, rect.width, 'x', space, style);
+        this.drawAxis(rect.x, rect.y, rect.height, 'y', space, style);
+    }
+
     //通用函数，可以绘制点线面，是否封闭，是否填充
     //其他绘制函数，都是该函数的特殊形式
     drawPoints(points = [], style = 'red', isClosed = true, isFill = true, compsiteOp = '') {
@@ -182,6 +241,7 @@ class BLFRender {
             ctx.closePath();
         }
 
+
         //填充还是描边绘制
         if (isFill == true) {
             ctx.fillStyle = style;
@@ -191,14 +251,23 @@ class BLFRender {
             ctx.stroke();
         }
 
+
         ctx.restore();
     }
 
     //context.strokeRect/fillRect不需要beginPath进行渲染状态清除
     //是一个简便方法
-    drawRect(rc, style = "red", isFill = true, compsiteOp = '') {
+    drawRect(rc, style = "red", isFill = true, isClip = false, compsiteOp = '') {
 
         let ctx = this.context;
+
+        if (isClip == true) {
+            ctx.beginPath();
+            ctx.rect(rc.x, rc.y, rc.width, rc.height);
+            ctx.clip();
+            return;
+        }
+
 
         ctx.save();
 
@@ -422,18 +491,229 @@ class BLFRender {
 
         return g;
     }
+
+    //transform
+
+    resetTransform() {
+        this.context.resetTransform();
+    }
+
+    translate(dx, dy) {
+        this.context.translate(dx, dy);
+    }
+
+    //绕default原点旋转
+    //参数为角度而不是弧度表示
+    rotate(degree) {
+        let radian = BLFUtil.toRadian(degree);
+        this.context.rotate(radian);
+    }
+
+    //绕任意点旋转
+    rotateAt(dx, dy, degree) {
+        this.context.translate(dx, dy);
+        this.rotate(degree);
+        this.context.translate(-dx, -dy);
+    }
+
+    scale(sx, sy) {
+        this.context.scale(sx, sy);
+    }
+
+    //以任意点为中心缩放
+    scaleAt(dx, dy, sx, sy) {
+        this.context.translate(dx, dy);
+        this.scale(sx, sy);
+        this.context.translate(-dx, -dy);
+    }
+
+    //true为水平反转，false为垂直反转
+    //反转镜像只是scale的特殊形式
+    mirror(horizontal = true) {
+        if (horizontal == true)
+            this.context.scale(-1, 1);
+        else
+            this.context.scale(1, -1);
+    }
+
+    //错切矩阵，输入为角度
+    skew(x = 0, y = 0) {
+
+        if (x == 0 && y == 0)
+            return;
+
+        let tanX = 0;
+        let tanY = 0;
+
+        if (x != 0)
+            tanX = Math.tan(BLFUtil.toRadian(x));
+
+        if (y != 0)
+            tanY = Math.tan(BLFUtil.toRadian(y));
+
+        //矩阵参数a,b,c,d,e,f
+        //b决定Y轴倾斜程度，c决定X轴倾斜程度
+        this.context.transform(1, tanY, tanX, 1, 0, 0);
+    }
+
+    transformTo(a, b, c, d, e, f) {
+        this.context.setTransform(a, b, c, d, e, f);
+    }
+
+    transformBy(a, b, c, d, e, f) {
+        this.context.transform(a, b, c, d, e, f);
+    }
+
 }
+
 
 class BLFSprite {
-    constructor() {
+    constructor(name = '') {
         this.typeName = "BASE";
+        this.name = name;
+        this.color = "rgba(255,0,0,1)";
+
+        this.x = 0;
+        this.y = 0;
+
+        this.rotation = 0;
+
+        this.centerX = 0;
+        this.centerY = 0;
     }
 
+    //虚函数，如有需要，子类需override
+    //default实现:目前暂时返回false
+    //todo：后面会实现绑定盒/圈系统，再重新实现default基类行为
+    hitTest(x, y) {
+        return false;
+    }
+
+    //虚函数，如有需要，子类需override
+    //default实现，啥都不干
+    update(msec) {
+        //console.log("update BLESprite");
+        console.log("update sprite:" + this.name + " with type:" + this.typeName);
+    }
+
+
+    beginRender(render) {
+        render.resetTransform();
+
+        if (this.x != 0 || this.y != 0)
+            render.translate(this.x, this.y);
+
+        if (this.rotation != 0)
+            if (this.centerX != 0 || this.centerY != 0) {
+                render.rotateAt(this.centerX, this.centerY, this.rotation);
+            } else
+                render.rotate(this.rotation);
+    }
+
+    //虚函数，如有需要，子类需override
+    //default实现:原本绘制背景，现改成纯虚方法
     render(render) {
-        render.clear();
-        render.drawGrid('white', 'black', 20, 20);
+
+    }
+
+    endRender(render) {
+        render.resetTransform();
+    }
+
+    //虚函数，如有需要，子类需要override
+    //default实现: 返回背景大小
+    getSize() {
+        return new Size(render.getCanvasWidth(), render.getCanvasHeight());
+    }
+
+}
+
+class BLFSpriteManager {
+
+    constructor() {
+        this.sprites = [];
+    }
+
+    addSprite(sprite) {
+        this.sprites.push(sprite);
+    }
+
+    //动态类型语言的好处
+    //根据参数类型有针对性处理
+    removeSprite(sprite) {
+        let idx = -1;
+        if (typeof(sprite) === "number")
+            idx = sprite;
+        else
+            idx = this.sprites.indexOf(sprite);
+
+        if (idx === -1)
+            return false;
+
+        this.sprites.splice(idx, 1);
+        return true;
+    }
+
+    getSprite(idx) {
+        if (idx < 0 || idx >= this.sprites.length)
+            return;
+
+        return this.sprites[idx];
+    }
+
+    getCount() {
+        return this.sprites.length;
     }
 }
+
+class BLFEngine2D {
+    constructor(context) {
+        this.render = new BLFRender(context);
+        this.sprMgr = new BLFSpriteManager();
+    }
+
+    //依次调用所有精灵的update方法
+    //各个精灵的更新都在精灵的update中进行
+    updateAll(msec) {
+        for (let i = 0; i < this.sprMgr.getCount(); i++) {
+            this.sprMgr.getSprite(i).update(msec);
+        }
+    }
+
+    renderAll() {
+        this.render.clear();
+        for (let i = 0; i < this.sprMgr.getCount(); i++) {
+            this.sprMgr.getSprite(i).beginRender(this.render);
+            this.sprMgr.getSprite(i).render(this.render);
+            this.sprMgr.getSprite(i).endRender(this.render);
+        }
+    }
+
+    printAll() {
+        let arr = [];
+        for (let i = 0; i < this.sprMgr.getCount(); i++) {
+            arr.push(this.sprMgr.getSprite(i).name);
+        }
+
+        console.log(JSON.stringify(arr, null, ""));
+    }
+
+    run(msec) {
+        this.updateAll(msec);
+        this.renderAll();
+        requestAnimationFrame((msec) => { this.run(msec) });
+
+        /*
+        let self = this;
+        requestAnimationFrame(function(msec) {
+            self.run(msec);
+        });
+        */
+    }
+
+}
+
+
 
 /*
 关于es6中的super关键字一个前提，两个用法有:
@@ -447,24 +727,85 @@ class BLFSprite {
                在子类的成员函数中调用基类类方法时使用super关键字而不是super()函数，切记！
 */
 class BLFRectSprite extends BLFSprite {
-    constructor() {
+    constructor(rect = new Rect(0, 0, 100, 50), name = '') {
         //super([基类构造函数参数列表])
-        super();
+        super(name);
 
         //this调用父类的成员属性必须在super()调用后才ok！！！！
         this.typeName = "RECT";
+        this.rect = rect;
+        this.x = 100;
+        this.y = 100;
+        this.centerX = rect.width * 0.5;
+        this.centerY = rect.height * 0.5;
     }
 
     render(render) {
-        //调用基类方法绘制背景
-        super.render(render);
+        render.drawRect(this.rect, this.color);
+    }
 
-        //rect比基类增加了文字绘制功能
-        //render.drawText(10, 100, 'red', "随风而行之青衫磊落险峰行来测试一下渲染表面");
+    getSize() {
+        return new Size(this.rect.with, this.rect.height);
+    }
 
-        //render.drawRect(new Rect());
-        //render.drawCircle(new Circle(100, 100, 100), 'green', false);
-        render.drawArc(new Arc(100, 100, 50), 'blue', false);
-        render.drawArc(new Arc(200, 100, 50), 'red', true);
+    update(msec) {
+        this.rotation += 1.0;
+    }
+}
+
+
+class BLFGridSprite extends BLFSprite {
+    constructor(name = '') {
+        //super([基类构造函数参数列表])
+        super(name);
+
+        //this调用父类的成员属性必须在super()调用后才ok！！！！
+        this.typeName = "GridBackgroud";
+    }
+
+    render(render) {
+        render.drawGrid('black', 'white', 20, 20);
+    }
+}
+
+
+class BLFDemoSprite extends BLFSprite {
+    constructor(center = false, name = '') {
+        //super([基类构造函数参数列表])
+        super(name);
+
+        //this调用父类的成员属性必须在super()调用后才ok！！！！
+        this.typeName = "DemoSprite";
+
+        this.x = 250;
+        this.y = 250;
+
+        this.rotateSpeed = 1;
+
+        this.rect = new Rect(0, 0, 100, 50);
+        this.lines = [new Point(100, 25), new Point(150, 25)];
+
+        //如果center = true
+        //旋转中心为rect的中心点，否则为rect的左上角
+        if (center) {
+            this.centerX = this.rect.width * 0.5;
+            this.centerY = this.rect.height * 0.5;
+        }
+    }
+
+    //渲染rect
+    //粗线渲染朝向标记线
+    //细线渲染坐标轴
+    render(render) {
+        render.drawRect(this.rect, 'blue');
+        render.pushStates();
+        render.setLineState(3.0);
+        render.drawLine(this.lines[0].x, this.lines[0].y, this.lines[1].x, this.lines[1].y, 'green');
+        render.popStates();
+        render.drawCoords(this.rect);
+    }
+
+    update(msec) {
+        this.rotation += this.rotateSpeed;
     }
 }

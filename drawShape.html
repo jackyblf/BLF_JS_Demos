@@ -16,16 +16,31 @@
 
         render.clear();
 
+        //没有裁剪前的绘制
+
+        //网格
         render.drawGrid('white', 'black', 20, 20);
+
+        //坐标标尺
+        render.drawAxis(0, 0, 800);
+        render.drawAxis(0, 0, 600, 'y');
+
+        //render.pushStates();
 
         render.setShadowState();
         render.setLineState();
 
-        render.drawRect(new Rect(2, 2, 80, 40));
-        render.drawRect(new Rect(102, 2, 80, 40), 'blue', false);
+        //红色填充rect
+        render.drawRect(new Rect(12, 22, 80, 40));
 
-        render.drawCircle(new Circle(250, 50, 50));
-        render.drawCircle(new Circle(360, 50, 50), 'blue', false);
+        //下面代码开始进行裁剪操作
+
+        //下面函数最后一个参数为true,表示clip
+        render.drawRect(new Rect(112, 22, 80, 40), 'blue', false, true);
+
+        //裁剪后的绘制
+        render.drawCircle(new Circle(170, 70, 50));
+        render.drawCircle(new Circle(390, 70, 50), 'blue', false);
 
         /*
         下面两个函数共同点:
@@ -35,16 +50,17 @@
         下面两个函数不同点:
           1. 上面函数isCCW(是否逆时针) = false,style = red
           2. 下面函数isCCW(是否逆时针) = true, style = blue
-           
         */
-        render.drawArc(new Arc(470, 50, 50, 30, 180, false), 'red', false);
-        render.drawArc(new Arc(470, 50, 50, 30, 180, false, true), 'blue', false);
+
+        render.drawArc(new Arc(490, 70, 50, 30, 180, false), 'red', false);
+        render.drawArc(new Arc(490, 70, 50, 30, 180, false, true), 'blue', false);
 
         //文字渲染效果，大家可以最后几个参数，查看字体，各种对齐方式
         render.setTextState();
+        render.drawText(200, 40);
         render.drawText(100, 80);
 
-        let pts = [new Point(550, 5), new Point(650, 5), new Point(650, 90)];
+        let pts = [new Point(550, 25), new Point(650, 25), new Point(650, 90)];
         //大家可以修改最后两个参数，可以看到是否封闭路径，是否填充路径等效果
         render.drawPoints(pts, 'blue', false, false);
 
@@ -53,10 +69,14 @@
         image.src = "./data/doom3.png";
         image1.src = "./data/ardunio_nano.jpg";
 
+
         image.onload = function(e) {
             let pattern = render.createPattern(image);
 
             if (pattern) {
+                //即使裁剪了，你会发现图片绘制代码依旧ok
+                //这是因为图片载入是异步操作，可能的情况是所有的图形都绘制完成了
+                //才会绘制图像
                 render.drawCircle(new Circle(200, 200, 100), pattern);
                 render.drawCircle(new Circle(200, 200, 100), "rgba(255,0,0,0.5)");
                 render.drawArc(new Arc(420, 200, 100, 30, 180), pattern);
@@ -66,9 +86,10 @@
         image1.onload = function(e) {
             let pattern = render.createPattern(image1);
             if (pattern) {
-                render.drawRect(new Rect(0, 320, 500, 200), pattern);
+                render.drawRect(new Rect(25, 320, 500, 200), pattern);
             }
         }
+
 
         //渐变色
         let colors = [{
@@ -84,12 +105,16 @@
 
         let coords = [550, 225, 750, 225]; //线性 4个参数[x0,y0,x1,y1] 组成一条直线
         let g = render.createGradient(coords, colors);
-        render.drawRect(new Rect(550, 200, 200, 50), g);
+        let rc = new Rect(550, 200, 200, 50);
+        render.drawRect(rc, g);
+        render.drawCoords(rc);
 
-        coords = [650, 400, 30, 650, 400, 100]; ///放射性 6 个参数[x0,y0,r0,x1,y1,r1]组成内圆和外圆
+        coords = [650, 400, 30, 650, 400, 100]; //放射性 6 个参数[x0,y0,r0,x1,y1,r1]组成内圆和外圆
 
         g = render.createGradient(coords /*, colors*/ );
         render.drawCircle(new Circle(650, 400, 100), g);
+
+        //render.popStates();
     </script>
 </body>
 

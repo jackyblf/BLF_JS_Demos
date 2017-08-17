@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>随风而行之青衫磊落险峰行JSDemo</title>
+    <script src="BLFES6Lib.js"></script>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="800" height="600" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
+    <script>
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext('2d');
+        let engine = new BLFEngine2D(context);
+        let spr = new BLFRectSprite(new Rect(0, 0, 50, 25), "spRect");
+
+        let spr2 = new BLFDemoSprite();
+        spr2.x = 400; //调整位置
+        spr2.rotateSpeed = -1; //逆时针
+
+        engine.sprMgr.addSprite(new BLFGridSprite("background"));
+        engine.sprMgr.addSprite(spr);
+        engine.sprMgr.addSprite(spr2); //逆时针左上角旋转
+        engine.sprMgr.addSprite(new BLFDemoSprite(true)); //顺时针中心旋转
+
+        //引擎进入loop
+        engine.run();
+    </script>
+</body>
+
+</html>

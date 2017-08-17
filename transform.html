@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>随风而行之青衫磊落险峰行JSDemo</title>
+    <script src="BLFES6Lib.js"></script>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="800" height="600" style="border: 1px solid black">你的浏览器还不支持哦</canvas>
+    <script>
+        function test_translate_rotate_rotateAt(rect) {
+            //开始变换
+            render.pushStates();
+
+            //平移[150,50],绘制绿色矩形
+            render.translate(110, 50);
+            render.drawRect(rect, 'green');
+
+            render.pushStates();
+            //default左上角旋转30度,绘制蓝色矩形
+            render.rotate(30);
+            render.drawRect(rect, 'blue');
+            render.popStates();
+
+            render.pushStates();
+            //中心旋转30度,绘制红色矩形
+            render.rotateAt(rect.getCenterX(), rect.getCenterY(), 90);
+            render.drawRect(rect, 'red');
+            render.popStates();
+
+            render.popStates();
+        }
+
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext('2d');
+        let render = new BLFRender(context);
+
+        let rect = new Rect(0, 0, 100, 50);
+
+        render.clear();
+
+        //网格
+        render.drawGrid('white', 'black', 20, 20);
+
+        //坐标标尺
+        render.drawCoords(new Rect(0, 0, 800, 600));
+
+        //没有变换前，绘制在左上角[0,0]坐标上(红色)
+        render.drawRect(rect, 'red');
+
+        //开始进行测试
+        test_translate_rotate_rotateAt(rect);
+    </script>
+</body>
+
+</html>
