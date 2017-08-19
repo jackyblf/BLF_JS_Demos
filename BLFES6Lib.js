@@ -1,5 +1,36 @@
 "use strict";
 
+//为了防止和jquery名字发生冲突，增加name后缀
+//例如jquery中是addClass,这里就变成了addClassName
+Element.prototype.hasClassName = function(a) {
+    return new RegExp("(?:^|\\s+)" + a + "(?:\\s+|$)").test(this.className);
+};
+
+Element.prototype.addClassName = function(a) {
+    if (!this.hasClassName(a)) {
+        this.className = [this.className, a].join(" ");
+    }
+};
+
+Element.prototype.removeClassName = function(b) {
+    if (this.hasClassName(b)) {
+        var a = this.className;
+        this.className = a.replace(new RegExp("(?:^|\\s+)" + b + "(?:\\s+|$)", "g"), " ");
+    }
+};
+
+Element.prototype.toggleClassName = function(a) {
+    this[this.hasClassName(a) ? "removeClassName" : "addClassName"](a);
+};
+
+//上面代码都很简单，下面这个是加强版的函数
+Element.prototype.changeClassName = function(remove, add) {
+    if (this.hasClassName(remove))
+        this.removeClassName(remove);
+    if (add)
+        this.addClassName(add);
+}
+
 //辅助类，定义静态辅助方法
 class BLFUtil {
     static toRadian(degree) {

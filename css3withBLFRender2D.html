@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="BLFES6Lib.js"></script>
+    <style type="text/css">
+        .container {
+            width: 600px;
+            height: 400x;
+            margin: 0 auto 40px;
+            border: 2px solid red;
+            perspective: 1200px;
+            /* 设置3D投影矩阵*/
+        }
+        
+        @keyframes myTransform {
+            from {
+                transform: translate3d(0px, 0px, -5000px) rotateX(-720deg);
+                /*从-720度*/
+            }
+            to {
+                transform: translate3d(0px, 0px, 0px) rotateX(720deg);
+                /*到720度*/
+            }
+        }
+        
+        @keyframes myYrotate {
+            from {
+                transform: rotateY(0deg);
+            }
+            to {
+                transform: rotateY(720deg);
+            }
+        }
+        
+        .animation {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            /*使用3d变换*/
+            animation: myTransform 5s;
+        }
+        
+        .animation1 {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            /*使用3d变换*/
+            animation: myYrotate 5s;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>随风而行之青衫磊落险峰行 BLFRender2D + CSSAnimation3D Demo</h1>
+
+    <section class="container">
+        <canvas id="myCanvas" class="animation" width="600" height="400">
+        你的浏览器还不支持哦
+    </canvas>
+    </section>
+
+</body>
+<script>
+    var init = function() {
+        let animationDiv = document.getElementById("myCanvas");
+        //初始化时候，canvas上的动画使用的是上下旋转及向前平移(典型的并行动画)，一旦完成后
+        //触发webkitAnimationEnd事件
+        //对webkitAnimationEnd事件进行处理，切换css为左右旋转,很典型的顺序动画
+        //当完成一个动画序列后，浏览器会发送一个完成事件
+        //我们对该事件进行处理就可以了
+        animationDiv.addEventListener("webkitAnimationEnd", function() {
+            animationDiv.changeClassName("animation", "animation1");
+        }, false);
+    };
+
+    //挂接init事件处理函数
+    window.addEventListener('DOMContentLoaded', init, false);
+
+    let canvas = document.getElementById("myCanvas");
+    let context = canvas.getContext('2d');
+    let engine = new BLFEngine2D(context);
+    let spr2 = new BLFDemoSprite(true);
+    spr2.y = 200;
+    spr2.rotateSpeed = -1; //逆时针
+    engine.sprMgr.addSprite(new BLFGridSprite("background"));
+    engine.sprMgr.addSprite(spr2);
+    engine.run(); //run的是BLFSprite精灵系统的动画
+</script>
+
+</html>
